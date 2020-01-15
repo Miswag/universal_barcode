@@ -10,7 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  barcode_scan: 1.0.0
+  last_qr_scanner:
+    git:
+      url: https://github.com/mustafa96m/LastQrScanner.git
 
 dev_dependencies:
   flutter_test:

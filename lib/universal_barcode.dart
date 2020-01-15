@@ -1,8 +1,11 @@
 library universal_barcode;
-
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:last_qr_scanner/last_qr_scanner.dart';
+
+import 'dart:async';
+
+import 'package:universal_barcode/utils/debouncer.dart';
 
 class UniversalBarcode extends StatefulWidget {
   final Function(String code) didCatchCode;
@@ -10,17 +13,74 @@ class UniversalBarcode extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
+
+  static Future<void> show(BuildContext context, Function(String) callback) async {
+
+    AlertDialog dialog = AlertDialog(
+      title: Text("Select A Method.."),
+      content:Container(
+        height: 340,
+        child: UniversalBarcode(callback),
+      ),
+      contentPadding: EdgeInsets.all(0),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Done'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return dialog;
+      },
+    );
+  }
 }
 
 class _UniversalBarcodeState extends State<UniversalBarcode> {
   bool keyboardMode = false;
+  bool cameraMode = false;
   TextEditingController _textEditingController = TextEditingController();
   String error;
   String barcode;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  var controller;
+
+  final _debouncer = Debouncer(milliseconds: 500);
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    final channel = controller.channel;
+    controller.init(qrKey);
+    channel.setMethodCallHandler((MethodCall call) async {
+      switch (call.method) {
+        case "onRecognizeQR":
+          _debouncer.run(() {
+            dynamic arguments = call.arguments;
+            widget.didCatchCode(arguments.toString());
+          });
+      }
+    });
+  }
+
+
   @override
   void initState() {
     super.initState();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +108,14 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
             ),
           )
               : Container(),
-          !keyboardMode ? buildKeyboardButton() : buildTextfield(),
-          FractionallySizedBox(
+          !keyboardMode ? buildKeyboardButton() : buildTextField(),
+          !cameraMode ? FractionallySizedBox(
             widthFactor: 0.7,
             child: RaisedButton.icon(
                 onPressed: openCameraScanner,
                 icon: Icon(Icons.camera_rear),
                 label: Text("Camera")),
-          )
+          ) : buildCameraFeed()
         ],
       ),
     );
@@ -70,23 +130,9 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
   }
 
   void openCameraScanner() async {
-    try {
-      String _barcode = await BarcodeScanner.scan();
-      didScan(_barcode);
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          this.error = 'The user did not grant the camera permission!';
-        });
-      } else {
-        setState(() => this.error = 'Unknown error: $e');
-      }
-    } on FormatException {
-      setState(() => this.error =
-      'null (User returned using the "back"-button before scanning anything. Result)');
-    } catch (e) {
-      setState(() => this.error = 'Unknown error: $e');
-    }
+    setState(() {
+      this.cameraMode = !cameraMode;
+    });
   }
 
   FractionallySizedBox buildKeyboardButton() {
@@ -106,7 +152,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
     });
   }
 
-  buildTextfield() {
+  buildTextField() {
     return FractionallySizedBox(
       widthFactor: 0.8,
       child: Container(
@@ -138,4 +184,23 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
       ),
     );
   }
+
+
+  void showInSnackBar(String message) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(message)));
+  }
+
+
+
+  Widget buildCameraFeed(){
+    return Container(
+      height: 210,
+      child: LastQrScannerPreview(
+        key: qrKey,
+        onQRViewCreated: _onQRViewCreated,
+      ),
+    );
+  }
 }
+
