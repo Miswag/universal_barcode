@@ -86,7 +86,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: c97824936960c6ae2008cf20867f03f02f8097ab
+      resolved-ref: "03817702c136e628f2e1f4f90f5c19649ad38319"
       url: "https://github.com/mustafa96m/LastQrScanner.git"
     source: git
     version: "0.0.6"

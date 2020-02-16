@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:universal_barcode/universal_barcode.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -32,9 +33,20 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           children: [
             OutlineButton.icon(
-                onPressed: () => UniversalBarcode.show(context, (_) => print(_)),
+                onPressed: () => UniversalBarcode.show(
+                    context, (_) => print(_), [BarcodeFormat.EAN_13]),
                 icon: Icon(Icons.extension),
-                label: Text("..."))
+                label: Text("Only EAN-13")),
+            OutlineButton.icon(
+                onPressed: () => UniversalBarcode.show(
+                    context, (_) => print(_), [BarcodeFormat.QR_CODE]),
+                icon: Icon(Icons.local_bar),
+                label: Text("Only QRCode")),
+            OutlineButton.icon(
+                onPressed: () => UniversalBarcode.show(
+                    context, (_) => print(_), BarcodeFormat.values),
+                icon: Icon(Icons.all_inclusive),
+                label: Text("Exhaustive All"))
           ],
         ),
       ),

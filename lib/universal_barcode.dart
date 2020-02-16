@@ -1,6 +1,8 @@
 library universal_barcode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:last_qr_scanner/barcode_types.dart';
+export 'package:last_qr_scanner/barcode_types.dart';
 import 'package:last_qr_scanner/last_qr_scanner.dart';
 
 import 'dart:async';
@@ -9,18 +11,19 @@ import 'package:universal_barcode/utils/debouncer.dart';
 
 class UniversalBarcode extends StatefulWidget {
   final Function(String code) didCatchCode;
-  UniversalBarcode(this.didCatchCode);
+  final List<BarcodeFormat> lookupFormats;
+  UniversalBarcode(this.didCatchCode, this.lookupFormats);
 
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
 
-  static Future<void> show(BuildContext context, Function(String) callback) async {
+  static Future<void> show(BuildContext context, Function(String) callback, List<BarcodeFormat> lookupFormats) async {
 
     AlertDialog dialog = AlertDialog(
       title: Text("Select A Method.."),
       content:Container(
         height: 340,
-        child: UniversalBarcode(callback),
+        child: UniversalBarcode(callback, lookupFormats),
       ),
       contentPadding: EdgeInsets.all(0),
       actions: <Widget>[
@@ -198,6 +201,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
       height: 210,
       child: LastQrScannerPreview(
         key: qrKey,
+        lookupFormats: widget.lookupFormats,
         onQRViewCreated: _onQRViewCreated,
       ),
     );
