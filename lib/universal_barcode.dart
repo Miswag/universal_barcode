@@ -56,7 +56,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   var controller;
 
-  final _debouncer = Debouncer(milliseconds: 500);
+  final _debouncer = Debouncer(milliseconds: 80);
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
