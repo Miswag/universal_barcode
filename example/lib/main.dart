@@ -32,6 +32,9 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         body: Column(
           children: [
+            UniversalBarcode(
+                (code){}, [BarcodeFormat.QR_CODE]
+            ),
             OutlineButton.icon(
                 onPressed: () => UniversalBarcode.show(
                     context, (_) => print(_), [BarcodeFormat.EAN_13]),

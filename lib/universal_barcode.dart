@@ -1,4 +1,5 @@
 library universal_barcode;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:last_qr_scanner/barcode_types.dart';
@@ -17,11 +18,11 @@ class UniversalBarcode extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
 
-  static Future<void> show(BuildContext context, Function(String) callback, List<BarcodeFormat> lookupFormats) async {
-
+  static Future<void> show(BuildContext context, Function(String) callback,
+      List<BarcodeFormat> lookupFormats) async {
     AlertDialog dialog = AlertDialog(
       title: Text("Select A Method.."),
-      content:Container(
+      content: Container(
         height: 340,
         child: UniversalBarcode(callback, lookupFormats),
       ),
@@ -48,9 +49,11 @@ class UniversalBarcode extends StatefulWidget {
 class _UniversalBarcodeState extends State<UniversalBarcode> {
   bool keyboardMode = false;
   bool cameraMode = false;
+  bool autoselect = true;
   TextEditingController _textEditingController = TextEditingController();
   String error;
   String barcode;
+  FocusNode barcodeFocusNode;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -73,17 +76,17 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();
+    barcodeFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
+    barcodeFocusNode.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -93,38 +96,53 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          Wrap(
+            direction: Axis.horizontal,
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              Checkbox(value: this.autoselect, onChanged: (val){
+                setState(() {
+                  this.autoselect = val;
+                });
+              },),
+              Text("Auto-select barcode scanner")
+            ],
+          ),
           this.error != null
               ? Center(
-            child: Text(
-              this.error,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red),
-            ),
-          )
+                  child: Text(
+                    this.error,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red),
+                  ),
+                )
               : Container(),
           this.barcode != null
               ? Center(
-            child: Text(
-              this.barcode,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.green),
-            ),
-          )
+                  child: Text(
+                    this.barcode,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.green),
+                  ),
+                )
               : Container(),
           !keyboardMode ? buildKeyboardButton() : buildTextField(),
-          !cameraMode ? FractionallySizedBox(
-            widthFactor: 0.7,
-            child: RaisedButton.icon(
-                onPressed: openCameraScanner,
-                icon: Icon(Icons.camera_rear),
-                label: Text("Camera")),
-          ) : buildCameraFeed()
+          !cameraMode
+              ? FractionallySizedBox(
+                  widthFactor: 0.7,
+                  child: RaisedButton.icon(
+                      onPressed: openCameraScanner,
+                      icon: Icon(Icons.camera_rear),
+                      label: Text("Camera")),
+                )
+              : buildCameraFeed()
         ],
       ),
     );
   }
 
-  didScan(String _barcode){
+  didScan(String _barcode) {
     setState(() {
       this.error = null;
       this.barcode = _barcode;
@@ -171,8 +189,12 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
                   onSubmitted: (code) {
                     didScan(code);
                     _textEditingController.clear();
+                    if (autoselect) {
+                      barcodeFocusNode.requestFocus();
+                    }
                   },
                   autofocus: true,
+                  focusNode: barcodeFocusNode,
                 )),
             FlatButton(
               onPressed: toggleKeyboard,
@@ -188,15 +210,12 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
     );
   }
 
-
   void showInSnackBar(String message) {
     _scaffoldKey.currentState
         .showSnackBar(new SnackBar(content: new Text(message)));
   }
 
-
-
-  Widget buildCameraFeed(){
+  Widget buildCameraFeed() {
     return Container(
       height: 210,
       child: LastQrScannerPreview(
@@ -207,4 +226,3 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
     );
   }
 }
-
