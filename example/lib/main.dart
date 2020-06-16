@@ -33,7 +33,8 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           children: [
             UniversalBarcode(
-                (code){}, [BarcodeFormat.QR_CODE]
+                (code){}, [BarcodeFormat.QR_CODE],
+              autoselectBarcodeScanner: true,
             ),
             OutlineButton.icon(
                 onPressed: () => UniversalBarcode.show(

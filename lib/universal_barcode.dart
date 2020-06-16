@@ -13,7 +13,8 @@ import 'package:universal_barcode/utils/debouncer.dart';
 class UniversalBarcode extends StatefulWidget {
   final Function(String code) didCatchCode;
   final List<BarcodeFormat> lookupFormats;
-  UniversalBarcode(this.didCatchCode, this.lookupFormats);
+  final bool autoselectBarcodeScanner;
+  UniversalBarcode(this.didCatchCode, this.lookupFormats, {this.autoselectBarcodeScanner = false});
 
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
@@ -80,6 +81,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
   void initState() {
     super.initState();
     barcodeFocusNode = FocusNode();
+    keyboardMode = widget.autoselectBarcodeScanner;
   }
 
   @override
