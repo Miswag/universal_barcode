@@ -33,7 +33,8 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           children: [
             UniversalBarcode(
-                (code){}, [BarcodeFormat.QR_CODE],
+              (code) {},
+              [BarcodeFormat.QR_CODE],
               autoselectBarcodeScanner: true,
             ),
             OutlineButton.icon(
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () => UniversalBarcode.show(
                     context, (_) => print(_), [BarcodeFormat.QR_CODE]),
                 icon: Icon(Icons.local_bar),
-                label: Text("Only QRCode")),
+                label: Text("Only QRCode [Debo]")),
             OutlineButton.icon(
                 onPressed: () => UniversalBarcode.show(
                     context, (_) => print(_), BarcodeFormat.values),

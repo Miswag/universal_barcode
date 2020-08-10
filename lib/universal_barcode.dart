@@ -1,20 +1,21 @@
 library universal_barcode;
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:last_qr_scanner/barcode_types.dart';
-export 'package:last_qr_scanner/barcode_types.dart';
-import 'package:last_qr_scanner/last_qr_scanner.dart';
-
 import 'dart:async';
 
-import 'package:universal_barcode/utils/debouncer.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:just_debounce_it/just_debounce_it.dart';
+import 'package:last_qr_scanner/barcode_types.dart';
+import 'package:last_qr_scanner/last_qr_scanner.dart';
+
+export 'package:last_qr_scanner/barcode_types.dart';
 
 class UniversalBarcode extends StatefulWidget {
   final Function(String code) didCatchCode;
   final List<BarcodeFormat> lookupFormats;
   final bool autoselectBarcodeScanner;
-  UniversalBarcode(this.didCatchCode, this.lookupFormats, {this.autoselectBarcodeScanner = false});
+  UniversalBarcode(this.didCatchCode, this.lookupFormats,
+      {this.autoselectBarcodeScanner = false});
 
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
@@ -50,7 +51,7 @@ class UniversalBarcode extends StatefulWidget {
 class _UniversalBarcodeState extends State<UniversalBarcode> {
   bool keyboardMode = false;
   bool cameraMode = false;
-  bool autoselect = true;
+  bool autoSelect = true;
   TextEditingController _textEditingController = TextEditingController();
   String error;
   String barcode;
@@ -60,8 +61,6 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   var controller;
 
-  final _debouncer = Debouncer(milliseconds: 80);
-
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     final channel = controller.channel;
@@ -69,10 +68,9 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
     channel.setMethodCallHandler((MethodCall call) async {
       switch (call.method) {
         case "onRecognizeQR":
-          _debouncer.run(() {
-            dynamic arguments = call.arguments;
-            widget.didCatchCode(arguments.toString());
-          });
+          dynamic arguments = call.arguments;
+          Debounce.milliseconds(
+              100, widget.didCatchCode, [arguments.toString()]);
       }
     });
   }
@@ -103,11 +101,14 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
             alignment: WrapAlignment.center,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
-              Checkbox(value: this.autoselect, onChanged: (val){
-                setState(() {
-                  this.autoselect = val;
-                });
-              },),
+              Checkbox(
+                value: this.autoSelect,
+                onChanged: (val) {
+                  setState(() {
+                    this.autoSelect = val;
+                  });
+                },
+              ),
               Text("Auto-select barcode scanner")
             ],
           ),
@@ -191,7 +192,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
                   onSubmitted: (code) {
                     didScan(code);
                     _textEditingController.clear();
-                    if (autoselect) {
+                    if (autoSelect) {
                       barcodeFocusNode.requestFocus();
                     }
                   },

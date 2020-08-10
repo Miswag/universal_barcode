@@ -1,6 +1,6 @@
 name: universal_barcode
 description: This module is being used internally to handle scanning barcodes in different modes.
-version: 0.0.6
+version: 0.0.7
 author: Miswag
 homepage:
 
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  just_debounce_it: ^3.0.0+2
   last_qr_scanner:
     git:
       url: https://github.com/mustafa96m/LastQrScanner.git
