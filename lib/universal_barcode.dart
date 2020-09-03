@@ -14,8 +14,9 @@ class UniversalBarcode extends StatefulWidget {
   final Function(String code) didCatchCode;
   final List<BarcodeFormat> lookupFormats;
   final bool autoselectBarcodeScanner;
+  final bool onlyCameraFeed;
   UniversalBarcode(this.didCatchCode, this.lookupFormats,
-      {this.autoselectBarcodeScanner = false});
+      {this.autoselectBarcodeScanner = false, this.onlyCameraFeed = false});
 
   @override
   State<StatefulWidget> createState() => _UniversalBarcodeState();
@@ -90,6 +91,11 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.onlyCameraFeed) return buildCameraFeed();
+    return _buildSelectionLayout();
+  }
+
+  Container _buildSelectionLayout() {
     return Container(
       width: double.infinity,
       child: Column(
@@ -220,7 +226,7 @@ class _UniversalBarcodeState extends State<UniversalBarcode> {
 
   Widget buildCameraFeed() {
     return Container(
-      height: 210,
+      height: widget.onlyCameraFeed ? double.infinity : 210,
       child: LastQrScannerPreview(
         key: qrKey,
         lookupFormats: widget.lookupFormats,

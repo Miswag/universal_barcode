@@ -1,6 +1,6 @@
 name: universal_barcode
 description: This module is being used internally to handle scanning barcodes in different modes.
-version: 0.0.7
+version: 0.0.8
 author: Miswag
 homepage:
 
